@@ -1,0 +1,157 @@
+@import url("https://fonts.googleapis.com/css?family=Permanent+Marker");
+
+body{
+	text-align: center;
+	background-color: #f4efd8;
+	
+}
+
+h1{
+	font-family: 'Permanent Marker', cursive;
+	font-size: 100px;
+}
+
+h2{
+	font-family: 'Permanent Marker', cursive;
+	font-size: 50px;
+}
+
+.indexContainer{
+    width: 1000px;
+    height: 500px;
+	margin: auto;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+.subContainer{
+	width: 400px;
+    height: 600px;
+	margin: auto;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+.boardContainer{
+	font-family: 'Permanent Marker', cursive;
+	font-size: 20px;
+	text-align: left 10px;
+	width: 400px;
+    height: 650px;
+    margin-top:1000;
+	margin: auto;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: url(images/scoreBoard.png) no-repeat center;
+	background-size:100% 100%;
+}
+
+
+
+
+
+.longButton{
+	font-family: 'Permanent Marker', cursive;
+	font-size: 30px;
+	border: 0;
+	cursor:pointer;  
+	width: 320px;
+	height: 100px;
+	background: url(images/submitButton.png) no-repeat center;
+	background-size:100% 100%;
+}
+
+.shortButton{
+	font-family: 'Permanent Marker', cursive;
+	font-size: 20px;
+	border: 0;
+	cursor:pointer;  
+	width: 120px;
+	height: 60px;
+	background: url(images/submitButton.png) no-repeat center;
+	background-size:100% 100%;
+}
+
+.midButton{
+	font-family: 'Permanent Marker', cursive;
+	font-size: 30px;
+	border: 0;
+	cursor:pointer;  
+	width: 280px;
+	height: 80px;
+	background: url(images/accountButton.png) no-repeat center;
+	background-size:100% 100%;
+}
+
+.text{
+	font-family: 'Permanent Marker', cursive;
+	font-size: 30px;
+}
+
+
+input:focus{
+	outline: none;
+}
+.input{
+	text-align: center;
+	font-size: 25px;
+	border: 0;
+	width: 300px;
+	height: 40px;
+	background: url(images/input.png) no-repeat center;
+	background-size:100% 100%;
+}
+
+.play{
+	font-size: 0;
+	border: 0;
+	width: 60px;
+	height: 60px;
+	cursor:pointer; 
+	background: url(images/play.png) no-repeat center;
+	background-size:100% 100%;
+}
+
+.logout{
+	font-size: 0;
+	border: 0;
+	width: 60px;
+	height: 60px;
+	cursor:pointer; 
+	background: url(images/logout.png) no-repeat center;
+	background-size:100% 100%;
+}
+
+.account{
+	font-size: 0;
+	border: 0;
+	width: 60px;
+	height: 60px;
+	cursor:pointer; 
+	background: url(images/account.png) no-repeat center;
+	background-size:100% 100%;
+}
+
+.board{
+	font-size: 0;
+	border: 0;
+	width: 60px;
+	height: 60px;
+	cursor:pointer;
+	background: url(images/board.png) no-repeat center;
+	background-size:100% 100%;
+}
+
+.buttonGroup{
+	display: flex;
+	flex-direction: row-reverse;
+}

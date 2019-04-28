@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Login Page</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<div class="buttonGroup">
+		<form action="http://localhost:5000/logout?_method=PUT" method="POST">
+			<input title="logout" type="submit" class="logout" name="submit" onfocus="this.blur()">
+		</form>
+
+		<form action="http://localhost:5000/accountbutton?_method=PUT" method="POST">
+			<input title="account" type="submit" class="account" name="submit" onfocus="this.blur()">
+		</form>
+
+		<form action="http://localhost:5000/boardbutton?_method=PUT" method="POST">
+			<input title="board" type="submit" class="board" name="submit" onfocus="this.blur()">
+				
+		</form>
+		<form action="http://localhost:5000/playbutton?_method=PUT" method="POST">
+			<input title="play" type="submit" class="play" name="submit" onfocus="this.blur()">
+		</form>
+	</div>
+	<div class="subContainer">
+		<h2>Reset Your Password</h2>
+		<div class="text">
+			<form action="http://localhost:5000/reset?_method=PUT" method="POST">
+				UserName<input type="text" class="input" name="username"><br>
+				Password<input type="password" class="input" name="password"><br>
+				New Password<input type="password" class="input" name="newpassword"><br>
+				<input type="submit" class="shortButton" name="submit" value="Reset">
+			</form>
+		</div>
+
+	</div>
+</body>
+</html>

@@ -1,0 +1,552 @@
+ <!DOCTYPE html>
+ <html>
+ <head>
+ 	<title>Main Page</title>
+ 	<link rel="stylesheet" type="text/css" href="style.css">
+ 	<script
+	  src="https://code.jquery.com/jquery-3.4.0.js"
+	  integrity="sha256-DYZMCC8HTC+QDr5QNaIcfR7VSPtcISykd+6eSmBW5qo="
+	  crossorigin="anonymous">
+	</script>
+ </head>
+ <body>
+ 	<div class="buttonGroup">
+		<form action="http://localhost:5000/logout?_method=PUT" method="POST">
+			<input title="logout" type="submit" class="logout" name="submit" onfocus="this.blur()">
+		</form>
+
+		<form action="http://localhost:5000/accountbutton?_method=PUT" method="POST">
+			<input title="account" type="submit" class="account" name="submit" onfocus="this.blur()">
+		</form>
+
+		<form action="http://localhost:5000/boardbutton?_method=PUT" method="POST">
+			<input title="board" type="submit" class="board" name="submit" onfocus="this.blur()">
+		</form>
+	</div>
+	<canvas height="576" width="1024" id="mCanvas" style="border:1px solid #000000"></canvas>
+	<script type="text/javascript">
+		var mCanvas = document.getElementById("mCanvas").getContext("2d");
+		var character = new Image();
+		var dead = new Image();
+		var run00 = new Image();
+		var run01 = new Image();
+		var run02 = new Image();
+		var run03 = new Image();
+		var run04 = new Image();
+		var run05 = new Image();
+		var run06 = new Image();
+		var run07 = new Image();
+		var run08 = new Image();
+		var run09 = new Image();
+		var run10 = new Image();
+		var run11 = new Image();
+		var run12 = new Image();
+		var run13 = new Image();
+		var run14 = new Image();
+		var run15 = new Image();
+
+		var crab01 = new Image();
+		var crab02 = new Image();
+		var crab03 = new Image();
+
+		var bat01 = new Image();
+		var bat02 = new Image();
+		var bat03 = new Image();
+		var bat04 = new Image();
+
+		var bullet = new Image();
+		var fire = new Image();
+
+		var background = new Image();
+		var board = new Image();
+		
+		var tile = new Image();
+		var barrier = new Image();
+
+		var score = 0;
+		var bestScore = 0;
+		var scoreCount = 0;
+		var level = 100;
+		var animation = 0;
+		var gameover = false;
+		var first = true;
+		var intervalvar;
+
+		var tileList = [];
+
+		var monsterTimer = 0;
+		var monsterDistance = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450];
+		var monsterList = [];
+
+		var bulletList = [];
+		var fireList = [];
+		var fireCount = 0;
+
+		var tileObj = {
+			'width': 1024,
+			'height': 200,
+			'speed': 5
+		}
+
+		var monsterObj = {
+			'speed': 15,
+		}
+
+		var crabObj = {
+			'width': 200,
+			'height': 200,
+			'hp': -1
+		}
+
+		var batObj = {
+			'width': 130,
+			'height': 130,
+			'hp': 5
+		}
+
+		var bulletObj = {
+			'width': 50,
+			'height': 20,
+			'speed': 20
+		}
+
+		var fireObj = {
+			'width': 40,
+			'height': 60
+		}
+
+		var characterObj = {
+			'x': 100,
+			'y': 275,
+			'width': 200,
+			'height': 200,
+			'jump': 0,
+			'jumpHeight': 300,
+			'jumpHeightMinus': -300,
+			'jumpUnit': 20,
+			'onair': false,
+			'onshooting': false,
+			'speed': 0,
+			'leftPressed': false,
+			'rightPressed': false,
+			'safe': true
+		}
+
+
+
+		background.onload = function(){
+
+			character.onload = function(){
+			dead.onload = function(){
+			board.onload = function(){
+				run00.onload = function(){
+				run01.onload = function(){
+				run02.onload = function(){
+				run03.onload = function(){
+				run04.onload = function(){
+				run05.onload = function(){
+				run06.onload = function(){
+				run07.onload = function(){
+				run08.onload = function(){
+				run09.onload = function(){
+				run10.onload = function(){
+				run11.onload = function(){
+				run12.onload = function(){
+				run13.onload = function(){
+				run14.onload = function(){
+				run15.onload = function(){
+
+				crab01.onload = function(){
+				crab02.onload = function(){
+				crab03.onload = function(){
+
+
+				bat01.onload = function(){
+				bat02.onload = function(){
+				bat03.onload = function(){
+				bat04.onload = function(){
+
+				bullet.onload = function(){
+				fire.onload = function(){
+
+					tile.onload = function(){
+
+						drawObj = function(obj, x, y, width, height){
+							mCanvas.drawImage(obj, x, y, width, height);
+						}
+
+						drawObj(background, 0, 0 , 1024, 576);
+						drawObj(character, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+						drawObj(tile, 0, 475, tileObj.width, tileObj.height);
+						mCanvas.save();
+						mCanvas.font = "50px Permanent Marker";
+						mCanvas.textAlign = "center";
+						mCanvas.fillText("Press K to Shoot", 512, 175);
+						mCanvas.fillText("Press Space to Jump", 512,250);
+						mCanvas.fillText("Click to Start", 512, 325);
+						mCanvas.restore();
+
+						document.getElementById("mCanvas").onmousedown = function(){
+							if(gameover){
+								mCanvas.clearRect(0, 0, 1024, 576);
+								gameover = false;
+								startGame();
+							}else if(first){
+								startGame();
+								first = false;
+							}
+							
+						}
+
+						document.onkeydown = function(event){
+							if(event.keyCode == 32 && !characterObj.onair && characterObj.y == 275){
+								characterObj.jump = characterObj.jumpHeight;
+								characterObj.onair = true;
+							}
+							if(event.keyCode == 75 && !characterObj.onair){
+								bulletList.push({x:300, y:340});
+								fireList.push({x:270, y:320});
+								characterObj.onshooting = true;
+							}
+						}
+
+						monsterCharacterCollision = function(m){
+							if(m.monster == 0){
+								return((m.x + 130 < characterObj.x + characterObj.width) && (m.y + 130 < characterObj.y + characterObj.height) && (characterObj.x < m.x + crabObj.width - 100) && (characterObj.y < m.y + crabObj.height - 50));
+							}else{
+								return((m.x + 70 < characterObj.x + characterObj.width) && (m.y + 40 < characterObj.y + characterObj.height) && (characterObj.x < m.x + batObj.width - 40) && (characterObj.y < m.y + batObj.height));
+							}
+						}
+
+						monsterBulletCollision = function(m, b){					
+							return((m.x + 100 < b.x + bulletObj.width) && (b.x < m.x + batObj.width));
+						}
+
+						jump = function(){
+							if(characterObj.jump > 0 && characterObj.onair){
+								characterObj.y -= characterObj.jumpUnit;
+								characterObj.jump -= characterObj.jumpUnit;
+							}
+							if(characterObj.jump <= 0 && characterObj.jump > characterObj.jumpHeightMinus && characterObj.onair){
+								characterObj.y += characterObj.jumpUnit;
+								characterObj.jump -= characterObj.jumpUnit;
+							}
+							if(characterObj.jump <= characterObj.jumpHeightMinus && characterObj.onair){
+								characterObj.onair = false;
+							}
+						}
+
+						shooting = function(){
+							if(characterObj.onshooting){
+								onshooting = false;
+							}
+						}
+
+						gameOver = function(){
+							mCanvas.save();
+							mCanvas.font = "50px Permanent Marker";
+							mCanvas.textAlign = "center";
+							mCanvas.fillText("Game Over", 512, 100);
+							mCanvas.fillText("Click to Restart", 512, 400);
+							mCanvas.restore();
+							clearInterval(intervalvar);
+						}
+
+						updateFire = function(){
+							fireCount++;
+							if(fireCount == 4){
+								for(var i in fireList){
+									fireList.splice(i, 1);
+								}
+								fireCount = 0;
+							}
+							
+						}
+
+						updateBulletPosition = function(){
+							for(var i in bulletList){
+								if(bulletList[i].x > 850){
+									bulletList.splice(i, 1);
+								}else{
+									bulletList[i].x += bulletObj.speed;
+								}
+							}
+						}
+
+						updateMonsterPosition = function(){
+							for(var i in monsterList){
+								if(monsterList[i].x < -200){
+									monsterList.splice(i, 1);
+									score += 50;
+								}else{
+									monsterList[i].x -= monsterObj.speed;
+								}
+							}
+						}
+
+						updateTilePosition = function(){
+							for(var i in tileList){
+								if(tileList[i].x < -1024){
+									tileList.splice(i, 1);
+									tileList.push({'x': 1024, 'y': 475});
+								}else{
+									tileList[i].x -= tileObj.speed;
+								}
+							}
+						}
+
+						updatePosition = function(){
+							mCanvas.clearRect(0, 0, 1024, 576);
+
+							drawObj(background, 0, 0, 1024, 576);
+
+							mCanvas.fillStyle = "#000000";
+							mCanvas.font = "50px Calibri";
+							mCanvas.textAlign = "right";
+							mCanvas.fillText(score, 980, 100);
+
+							monsterTimer++;
+							if(monsterTimer > level){
+								var monster = Math.round(Math.random() * 10)
+								if(monster % 2 == 0){
+									monsterList.push({x: 1024 + 300 + monsterDistance[Math.round(Math.random() * 9)], y: 275, monster: 0});
+								}else{
+									monsterList.push({x: 1024 + 300 + monsterDistance[Math.round(Math.random() * 9)], y: 275, monster: 1});
+								}
+								
+								monsterTimer = 0;
+							}
+
+							if(gameover){
+								drawObj(board, 312, 160, 400, 200);
+								drawObj(dead, 442, 40, 220, 160);
+								$.ajax({
+									url: "http://localhost:5000/addscore?_method=PUT",
+									type: 'POST',
+									data: {score: score},
+									success: function(data){
+										if(data.message == "success"){
+											console.log("Score pass to server");
+											var count = 0;
+											$.each(data.data, function(key, val){
+												if(val.score && val.username && count < 1){
+													mCanvas.save();
+													mCanvas.font = "50px Calibri";
+													mCanvas.textAlign = "center";
+													mCanvas.fillText("Best Record", 512, 250);
+													mCanvas.fillText(val.score, 512, 330);
+													mCanvas.restore();
+													count++;
+												}						
+											});
+										}
+									}
+								});
+								gameOver();
+							}else if(animation == 0){
+								drawObj(character, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 1;
+							}else if(animation == 1){
+								drawObj(run00, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 2;
+							}else if(animation == 2){
+								drawObj(run01, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 3;
+							}else if(animation == 3){
+								drawObj(run02, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 4;
+							}else if(animation == 4){
+								drawObj(run03, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 5;
+							}else if(animation == 5){
+								drawObj(run04, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 6;
+							}else if(animation == 6){
+								drawObj(run05, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 7;
+							}else if(animation == 7){
+								drawObj(run06, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 8;
+							}else if(animation == 8){
+								drawObj(run07, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 9;
+							}else if(animation == 9){
+								drawObj(run08, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 10;
+							}else if(animation == 10){
+								drawObj(run09, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 11;
+							}else if(animation == 11){
+								drawObj(run10, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 12;
+							}else if(animation == 12){
+								drawObj(run11, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 13;
+							}else if(animation == 13){
+								drawObj(run12, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 14;
+							}else if(animation == 14){
+								drawObj(run13, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 15;
+							}else if(animation == 15){
+								drawObj(run14, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 16;
+							}else if(animation == 16){
+								drawObj(run15, characterObj.x, characterObj.y, characterObj.width, characterObj.height);
+								animation = 1;
+							}
+
+							for(var i in monsterList){
+								if(monsterCharacterCollision(monsterList[i])){
+									gameover = true;
+									monsterList = [];
+								}else if(monsterList[i].monster == 0 && !gameover){
+									if(animation == 1 || animation == 2 || animation == 3 || animation == 4 || animation == 5){
+										drawObj(crab01, monsterList[i].x, monsterList[i].y, crabObj.width, crabObj.height);
+									}else if(animation == 6 || animation == 7 || animation == 8 || animation == 9 || animation == 10){
+										drawObj(crab02, monsterList[i].x, monsterList[i].y, crabObj.width, crabObj.height);
+									}else if(animation == 11 || animation == 12 || animation == 13 || animation == 14 || animation == 15 || animation == 16){
+										drawObj(crab03, monsterList[i].x, monsterList[i].y, crabObj.width, crabObj.height);
+									}
+								}else if(monsterList[i].monster == 1 && !gameover){
+									if(animation == 1 || animation == 2 || animation == 3 || animation == 4){
+										drawObj(bat01, monsterList[i].x, monsterList[i].y, batObj.width, batObj.height);
+									}else if(animation == 5 || animation == 6 || animation == 7 || animation == 8){
+										drawObj(bat02, monsterList[i].x, monsterList[i].y, batObj.width, batObj.height);
+									}else if(animation == 9 || animation == 10 || animation == 11 || animation == 12){
+										drawObj(bat03, monsterList[i].x, monsterList[i].y, batObj.width, batObj.height);
+									}else if(animation == 13 || animation == 14 || animation == 15 || animation == 16){
+										drawObj(bat04, monsterList[i].x, monsterList[i].y, batObj.width, batObj.height);
+									}	
+								}								
+							}
+
+							for(var i in bulletList){
+								drawObj(bullet, bulletList[i].x, bulletList[i].y, bulletObj.width, bulletObj.height);
+								for(var j in monsterList){
+									if(monsterList[i].monster == 1){
+										if(monsterBulletCollision(monsterList[j], bulletList[0])){
+											monsterList.splice(j, 1);
+											bulletList.splice(i, 1);
+											score += 100;
+										}
+									}else{
+
+									}
+									
+								}
+							}
+
+							for(var i in fireList){
+								drawObj(fire, fireList[i].x, fireList[i].y, fireObj.width, fireObj.height);
+							}
+
+							for(var i in tileList){
+								drawObj(tile, tileList[i].x, tileList[i].y, tileObj.width, tileObj.height);
+							}
+
+							if(scoreCount == 0){
+								scoreCount++
+							}else if(scoreCount == 1){
+								scoreCount++
+							}else if(scoreCount == 2){
+								score++;
+								level -= 0.1;
+								if(level < 30){
+									level = 50;
+								}
+								scoreCount = 0;
+							}
+							
+							updateBulletPosition();
+							updateFire();
+							updateMonsterPosition();
+							updateTilePosition();
+							shooting();
+							jump();
+						}
+
+						startGame = function(){
+							score = 0;
+							scoreCount = 0;
+							level = 100;
+							character.safe = true;
+							barrierTimer = 0;
+							gameover = false;
+							tileList = [];
+							barrierList = [];
+
+							for(var i = 0; i < 2; i++){
+								tileList.push({'x': i * 1024, 'y': 475});
+							}
+
+							intervalvar = setInterval(updatePosition, 40);
+						}
+
+					}
+					tile.src = "images/tile.png";
+				}
+				fire.src = "images/bullet/fire.png";
+				}
+				bullet.src = "images/bullet/bullet.png";
+				}
+				bat04.src = "images/bat/bat03.png";
+				}
+				bat03.src = "images/bat/bat03.png";
+				}
+				bat02.src = "images/bat/bat02.png";
+				}
+				bat01.src = "images/bat/bat01.png";
+				}
+				crab03.src = "images/crab/crab03.png";
+				}
+				crab02.src = "images/crab/crab02.png";
+				}
+				crab01.src = "images/crab/crab01.png";
+				}
+				run15.src = "images/run/Armature_RUN_15.png";
+				}
+				run14.src = "images/run/Armature_RUN_14.png";
+				}
+				run13.src = "images/run/Armature_RUN_13.png";
+				}
+				run12.src = "images/run/Armature_RUN_12.png";
+				}
+				run11.src = "images/run/Armature_RUN_11.png";
+				}
+				run10.src = "images/run/Armature_RUN_10.png";
+				}
+				run09.src = "images/run/Armature_RUN_09.png";
+				}
+				run08.src = "images/run/Armature_RUN_08.png";
+				}
+				run07.src = "images/run/Armature_RUN_07.png";
+				}
+				run06.src = "images/run/Armature_RUN_06.png";
+				}
+				run05.src = "images/run/Armature_RUN_05.png";
+				}
+				run04.src = "images/run/Armature_RUN_04.png";
+				}
+				run03.src = "images/run/Armature_RUN_03.png";
+				}
+				run02.src = "images/run/Armature_RUN_02.png";
+				}
+				run01.src = "images/run/Armature_RUN_01.png";
+				}
+				run00.src = "images/run/Armature_RUN_00.png";
+
+				
+			}
+			board.src = "images/GameOver.png";
+			}
+			dead.src = "images/pendead.png";
+			}
+			character.src = "images/penstand.png";
+		}
+		background.src = "images/tile.png";
+
+	</script>
+
+ </body>
+ </html>

@@ -7,7 +7,7 @@ var app = express();
 var fs = require('fs');
 
 app.use(session({
-	secret: 'suijishu',
+	secret: '2347095302',
 	cookie: {maxAge: 60 * 1000 * 30}
 }));
 app.use(bodyParser.json());
@@ -34,7 +34,24 @@ app.get('/login', function(req, res){
 
 
 app.get('/main.html', function (req, res) {
+	res.send(req.session.username);
    res.sendFile( __dirname + "/" + "main.html" );
+})
+
+app.get('/account.html', function (req, res) {
+   res.sendFile( __dirname + "/" + "account.html" );
+})
+
+app.get('/board.html', function (req, res) {
+   res.sendFile( __dirname + "/" + "board.html" );
+})
+
+app.get('/reset.html', function (req, res) {
+   res.sendFile( __dirname + "/" + "reset.html" );
+})
+
+app.get('/delete.html', function (req, res) {
+   res.sendFile( __dirname + "/" + "delete.html" );
 })
 
 app.get('/record.html', function (req, res) {
@@ -71,6 +88,42 @@ app.put('/loginbutton', function(req, res){
 	res.redirect('login.html');
 })
 
+app.put('/playbutton', function(req, res){
+	if(!req.session.sign){
+		res.redirect("login.html");
+	}else{
+		res.redirect('main.html');
+	}
+})
+
+app.put('/accountbutton', function(req, res){
+	if(!req.session.sign){
+		res.redirect("login.html");
+	}else{
+		res.redirect('account.html');
+	}
+})
+
+app.put('/boardbutton', function(req, res){
+	res.redirect('board.html');
+})
+
+app.put('/resetbutton', function(req, res){
+	if(!req.session.sign){
+		res.redirect("login.html");
+	}else{
+		res.redirect('reset.html');
+	}
+})
+
+app.put('/deletebutton', function(req, res){
+	if(!req.session.sign){
+		res.redirect("login.html");
+	}else{
+		res.redirect('delete.html');
+	}
+})
+
 app.put('/create', function(req, res){
 	var accountInfo = {
 		"username": req.body.username,
@@ -97,7 +150,7 @@ app.put('/create', function(req, res){
 	}else if(passwordLength < 6){
 		res.send("Password must be longer than 6.");
 	}else if(usernameLength > 12){
-		res.send("Password must be shorter than 12");
+		res.send("Username must be longer than 3");
 	}else{
 		
 		MongoClient.connect(url, {useNewUrlParser: true}, function(err, db){
@@ -128,6 +181,7 @@ app.put('/create', function(req, res){
 					});
 					db.close();
 					req.session.sign = true;
+					req.session.username = username.username;
 					res.redirect(301, 'main.html');
 				}
 			});
@@ -172,6 +226,7 @@ app.put('/login', function(req, res){
 					var password = data[0].password;
 					if(response.password == password){
 						req.session.sign = true;
+						req.session.username = username.username;
 						res.redirect(301, 'main.html');
 					}else{
 						res.send("wrong password");
@@ -195,9 +250,13 @@ app.put('/reset', function(req, res){
 		"password": req.body.password
 	};
 
+	var username = {
+		"username": req.body.username
+	}
+
 	var newpassword = {
 		"password": req.body.newpassword
-	}
+	}	
 
 	MongoClient.connect(url, {useNewUrlParser: true}, function(err, db){
 		if(err){
@@ -205,27 +264,34 @@ app.put('/reset', function(req, res){
 		}
 
 		var dbase = db.db("scorechart");
-		var cursor = dbase.collection("accountinfo").find(response.username);
-		cursor.toArrary(function(err, data){
+		var cursor = dbase.collection("accountinfo").find(username);
+		cursor.toArray(function(err, data){
 			var password = data[0].password;
 			if(response.password == password){
-				passwordLength = newpassword.password.length();
+				passwordLength = newpassword.password.length;
 				if(passwordLength < 6){
 					res.send("Password must be longer than 6.");
-				}else if(usernameLength > 12){
+				}else if(passwordLength > 12){
 					res.send("Password must be shorter than 12");
 				}else{
-					dbase.collection("accountinfo").updateOne(response.username, newpassword, function(err, res){
+					var updatedpassword = {
+						$set:{
+							"password": newpassword.password
+						}
+					}
+					dbase.collection("accountinfo").updateOne(username, updatedpassword, function(err, res){
 						if(err){
 							throw err;
 						}
 					});
+					db.close();
+					res.redirect('/main.html');
 				}
 			}else{
 				res.send("wrong password");
 			}
 		});
-		db.close();
+		
 	})
 });
 
@@ -235,38 +301,60 @@ app.put('/delete', function(req, res){
 		"password": req.body.password
 	};
 
+	var username = {
+		"username": req.body.username
+	}
+
 	MongoClient.connect(url, {useNewUrlParser: true}, function(err, db){
 		if(err){
 			throw err;
 		}
 
 		var dbase = db.db("scorechart");
-		dbase.collection("accountinfo").deleteOne(response, function(err, obj){
-			if(err){
-				throw err;
-			}else{
+
+		var cursor = dbase.collection("accountinfo").find(username);
+		cursor.toArray(function(err, data){
+			if(response.password == data[0].password){
+				dbase.collection("accountinfo").deleteOne(response, function(err, obj){
+					if(err){
+						throw err;
+					}		
+				});
+				dbase.collection("allscore").deleteMany(username, function(err, obj){
+					if(err){
+						throw err;
+					}		
+				});
 				dbase.collection(response.username).drop(function(err, delOK){
 					if(err){
 						throw err;
 					}
+					db.close();
 				});
+				req.session.destroy();
+				res.redirect('/index.html');
+				
+			}else{
+				res.send("wrong password");
 			}
-			db.close();
 		});
-		
 	});
 });
 
 app.put('/addscore', function(req, res){
 	var username = {
-		"username": req.body.username
+		"username": req.session.username
 	}
 
+	var score = parseInt(req.body.score);
+
 	var score = {
-		"username": req.body.username,
-		"score": req.body.score,
+		"username": req.session.username,
+		"score": score,
 		"time": currentTime
 	}
+
+	console.log(username.username);
 
 	MongoClient.connect(url, {useNewUrlParser: true}, function(err, db){
 		if(err){
@@ -285,12 +373,22 @@ app.put('/addscore', function(req, res){
 			}
 			db.close();
 		});
+		var sort = {score: -1};
+		dbase.collection(username.username).find({}).sort(sort).toArray(function(err, data){
+			if(err){
+				throw err;
+			}
+			res.json({
+				message: "success",
+				data
+			})
+		})
 	});
 });
 
 app.put('/myscore', function(req, res){
 	var username = {
-		"username": req.body.username
+		"username": req.session.username
 	}
 
 	MongoClient.connect(url, {useNewUrlParser: true}, function(err, db){
@@ -298,12 +396,16 @@ app.put('/myscore', function(req, res){
 			throw err;
 		}
 
+		var sort = {score: -1};
 		var dbase = db.db("scorechart");
-		dbase.collection(username.username).find({}).toArrary(function(err, data){
+		dbase.collection(username.username).find({}).sort(sort).toArray(function(err, data){
 			if(err){
 				throw err;
 			}
-			console.log(data);
+			res.json({
+				message: "success",
+				data
+			})
 			db.close();
 		});
 	})
@@ -315,17 +417,20 @@ app.put('/allscore', function(req, res){
 			throw err;
 		}
 
+		var sort = {score: -1};
 		var dbase = db.db("scorechart");
-		dbase.collection("allscore").find({}).toArrary(function(err, data){
+		dbase.collection("allscore").find({}).sort(sort).toArray(function(err, data){
 			if(err){
 				throw err;
 			}
-			console.log(data);
+			res.json({
+				message: "success",
+				data
+			})
 			db.close(); 
 		})
 	})
 })
-
 
 
 

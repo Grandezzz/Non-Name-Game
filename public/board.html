@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Board Page</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<script
+	  src="https://code.jquery.com/jquery-3.4.0.js"
+	  integrity="sha256-DYZMCC8HTC+QDr5QNaIcfR7VSPtcISykd+6eSmBW5qo="
+	  crossorigin="anonymous">
+	</script>
+	<script type="text/javascript">
+		$.ajax({
+					url: "http://localhost:5000/allscore?_method=PUT",
+					type: 'POST',
+					data: {},
+					success: function(data){
+						if(data.message == "success"){
+							console.log(data.data);
+							var count = 0;
+							$("#target").append("<p style='font-size:40px; margin-bottom: 10px'>Top 10 Board</p>");
+							$.each(data.data, function(key, val){
+								if(val.score && val.username && count < 10){
+									$("#target").append("<p>" + val.username + " " +  val.score + "</p>");
+									count++;
+								}						
+							});
+						}
+					}
+				});
+	</script>
+</head>
+
+
+<body>
+	<div class="buttonGroup">
+		<form action="http://localhost:5000/logout?_method=PUT" method="POST">
+			<input title="logout" type="submit" class="logout" name="submit" onfocus="this.blur()">
+		</form>
+
+		<form action="http://localhost:5000/accountbutton?_method=PUT" method="POST">
+			<input title="account" type="submit" class="account" name="submit" onfocus="this.blur()">
+		</form>
+
+		<form action="http://localhost:5000/playbutton?_method=PUT" method="POST">
+			<input title="play" type="submit" class="play" name="submit" onfocus="this.blur()">
+		</form>
+	</div>
+	<div id="target" class="boardContainer"></div>
+</body>
+</html>
